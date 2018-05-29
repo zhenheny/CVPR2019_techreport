@@ -1,0 +1,110 @@
+\documentclass[10pt,twocolumn,letterpaper]{article}
+
+\usepackage{tex/cvpr}
+\usepackage{times}
+\usepackage{epsfig}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+% Include other packages here, before hyperref.
+
+% If you comment hyperref and then uncomment it, you should delete
+% egpaper.aux before re-running latex.  (Or just hit 'q' on the first latex
+% run, let it finish, and you should be clear).
+\usepackage[pagebackref=true,breaklinks=true,letterpaper=true,colorlinks,bookmarks=false]{hyperref}
+
+\usepackage{times}
+\usepackage{helvet}
+\usepackage{courier}
+\usepackage{graphicx}
+\usepackage{bm}
+\usepackage{amsmath,amssymb} % define this before the line numbering.
+\usepackage{color}
+%\usepackage[width=122mm,left=12mm,paperwidth=146mm,height=193mm,top=12mm,paperheight=217mm]{geometry}
+\usepackage{bbm}
+\usepackage{epstopdf}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{enumitem}
+\usepackage{calc}
+\usepackage{multirow}
+\usepackage{xspace}
+\usepackage{booktabs}
+\usepackage{mathrsfs}
+\usepackage{array}
+\usepackage[font=small,skip=4pt]{caption}
+
+\newcommand{\figref}[1]{Fig\onedot~\ref{#1}}
+\newcommand{\equref}[1]{Eq\onedot~\eqref{#1}}
+\newcommand{\secref}[1]{Sec\onedot~\ref{#1}}
+\newcommand{\tabref}[1]{Tab\onedot~\ref{#1}}
+\newcommand{\thmref}[1]{Theorem~\ref{#1}}
+\newcommand{\prgref}[1]{Program~\ref{#1}}
+\newcommand{\algref}[1]{Alg\onedot~\ref{#1}}
+\newcommand{\clmref}[1]{Claim~\ref{#1}}
+\newcommand{\lemref}[1]{Lemma~\ref{#1}}
+\newcommand{\ptyref}[1]{Property\onedot~\ref{#1}}
+\newcommand{\ve}[1]{{\mathbf #1}} % for displaying a vector or matrix
+\newcommand{\hua}[1]{{\mathcal #1}}
+\newcommand{\scr}[1]{{\mathcal #1}}
+\newcommand{\by}[2]{\ensuremath{#1 \! \times \! #2}}
+\newcommand{\thickhline}{%
+    \noalign {\ifnum 0=`}\fi \hrule height 1pt
+    \futurelet \reserved@a \@xhline
+}
+
+
+%\makeatletter
+\DeclareRobustCommand\onedot{\futurelet\@let@token\@onedot}
+\def\onedot{\ifx\@let@token.\else.\null\fi\xspace}
+\def\eg{\emph{e.g.}} 
+\def\Eg{\emph{E.g}\onedot}
+\def\any{\forall}
+\def\ie{\emph{i.e.}} 
+\def\Ie{\emph{I.e}\onedot}
+\def\cf{\emph{cf}\onedot} 
+\def\Cf{\emph{Cf}\onedot}
+\def\etc{\emph{etc}\onedot} 
+\def\vs{\emph{vs}\onedot}
+\def\wrt{w.r.t\onedot} 
+\def\dof{d.o.f\onedot}
+\def\etal{\emph{et al.}}
+
+\cvprfinalcopy % *** Uncomment this line for the final submission
+\pagenumbering{gobble}
+\def\cvprPaperID{****} % *** Enter the CVPR Paper ID here
+\def\httilde{\mbox{\tt\raisebox{-.5ex}{\symbol{126}}}}
+
+% Pages are numbered in submission mode, and unnumbered in camera-ready
+\ifcvprfinal\pagestyle{empty}\fi
+\begin{document}
+%%%%%%%%% TITLE
+\title{Activity driven objection detection by learning from videos}
+
+\author{
+Zhenheng Yang$^{1}$~~Vignesh Ramanathan$^{2}$~~Deepti Ghadiyaram$^{2}$~~Dhruv Mahajan$^{2}$~~Ram Nevatia$^{1}$\\
+\\
+% \texttt{
+% zhenheny@usc.edu~\{wangpeng54,wangyang59,wei.xu\}@baidu.com~nevatia@usc.edu}\\
+$^{1}$University of Southern California~~$^{2}$Facebook Research~~\\
+}
+
+\maketitle
+%\thispagestyle{empty}
+
+\input{tex/abstract.tex}
+% \input{introduction}
+% \input{related}
+% \input{preliminaries}
+% % \input{approach_new}
+% \input{approach}
+% \input{experiments}
+% \input{conclusion}
+
+{\small
+\bibliographystyle{tex/ieee}
+\bibliography{tex/reference}
+}
+
+\end{document}

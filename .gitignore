@@ -1,0 +1,13 @@
+*.pyc
+*.aux
+*.blg
+*.log
+*.bbl
+*.out
+*.fls
+*.pptx
+*.DS_Store
+*.fdb_latexmk
+*.synctex.gz
+unsp_video_obj.pdf
+unsp_video_obj.brf
