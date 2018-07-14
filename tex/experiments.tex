@@ -2,7 +2,19 @@
 \section{Evaluation}
 % \vspace{-0.3\baselineskip}
 \label{sec:evaluation}
+In this section, the datasets and evaluation metrics are firstly introduced. We then describe the implementation details of the framework. Compreshensive experiments have been conducted on to validate the effectiveness of our pipeline on different tasks.
 
+\subsection{Datasets and metrics}
+We conducted experiments on object detection and classification. The performances are evaluated on the Charades dataset \cite{sigurdsson2016hollywood}.
+
+\textbf{Datasets.} The activity driven weakly supervised detection task takes video and corresponding action label as training input, and is evaluated on static images with bounding box annotations. Charades dataset is a good choice to both train and evaluate on. It includes 9,848 videos of 157 action classes, among which, 66 are interactive actions with objects. There are on average 6.8 action labels for one video, resulting in a total of 67,000 clips. 7,986 videos (54,000 clips) in training set are used as training samples. The official Charades dataset doesn't provide object bounding box annotations. Instead, we use the spatial bounding box annotations released by \cite{yuan2017temporal}. In the released annotations, 17 objects in the 66 interactive actions are labeled with bounding boxes in the test set videos. The 1,812 test videos are downsampled to 1 frame per second (fps) and then annotated on each frames. There are 3.4 bounding box annotations per frame on average. Although all downsampled frames in test set have been annotated, 5,000 frames from 200 test videos are actually used for evaluation. We follow the same practice (evaluate on 5,000 frames) to directly compare with the current SOTA methods.
+
+\textbf{Evaluation metrics.} We have conducted experiments to evaluate the object detection and image classification performances on the test set. For detection, we report per-class \textit{average precision} (AP) at \textit{intersection-over-union} (IoU) of 0.5 between detection and ground truth boxes, and also mean AP (mAP) as a combined metric. For classification, we report the mAP on frame-level image classification. 
+
+\subsection{Implementation details}
+\subsection{Ablation study}
+\subsection{Comparison with SOTA}
+\subsection{Generalization study}
 \begin{table*}[]
 \centering
 \fontsize{6}{8}\selectfont
@@ -18,7 +30,7 @@ Ours                                           & 8.64 & \textbf{3.79} & 7.31 & 0
 \end{tabular}
 \end{table*}
 
-We conducted experiments on Charades dataset \cite{sigurdsson2016hollywood}. Charades dataset includes 9848 videos of 157 action classes, among which, 66 actions include interaction with objects. In our experiments, the pipeline is trained on 7342 training clips with interactive action class labels and evaluated on 5,000 test frames with object bounding box annotations \cite{yuan2017temporal}. The 5,000 frames are randomly picked from 1814 test videos. 
+
 
 Our method is compared with several baseline methods on the same dataset for both the detection (det) and classification (cls) tasks. The baselines include \cite{bilen2016weakly,kantorov2016contextlocnet} which are weakly supervised object detectors learning from static images, \cite{yuan2017temporal} which learns object detector from videos but only leverages the temporal consistency within the same action class, R*CNN \cite{gkioxari2015contextual} with both pretrained model and model trained on Charades data and Faster R-CNN (pretrained and trained on Charades), which is a fully supervised baseline. The performances are presented in Tab. \ref{tbl:sota}. We also compare current SOTA methods on each object class, which is shown in Tab. \ref{tbl:class_wise}.
 
