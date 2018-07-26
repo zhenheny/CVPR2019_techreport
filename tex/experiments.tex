@@ -2,38 +2,95 @@
 \section{Evaluation}
 % \vspace{-0.3\baselineskip}
 \label{sec:evaluation}
-In this section, the datasets and evaluation metrics are firstly introduced. We then describe the implementation details of the framework. Compreshensive experiments have been conducted on to validate the effectiveness of our pipeline on different tasks.
+In this section, the datasets and evaluation metrics are firstly introduced. We then describe the implementation details of the framework. Compreshensive experiments have been conducted to validate the effectiveness of our approach on different tasks.
 
 \subsection{Datasets and metrics}
 We conducted experiments on object detection and classification. The performances are evaluated on the Charades dataset \cite{sigurdsson2016hollywood}.
 
-\textbf{Datasets.} The activity driven weakly supervised detection task takes video and corresponding action label as training input, and is evaluated on static images with bounding box annotations. Charades dataset is a good choice to both train and evaluate on. It includes 9,848 videos of 157 action classes, among which, 66 are interactive actions with objects. There are on average 6.8 action labels for one video, resulting in a total of 67,000 clips. The official Charades dataset doesn't provide object bounding box annotations. Instead, we use the spatial bounding box annotations released by \cite{yuan2017temporal}. In the released annotations, 17 objects in the 66 interactive actions are labeled with bounding boxes in the test set videos. The 1,812 test videos are downsampled to 1 frame per second (fps) and then annotated on each frames. There are 3.4 bounding box annotations per frame on average. Although all downsampled frames in test set have been annotated, 5,000 frames from 200 test videos are actually used for evaluation. We follow the same practice as in \cite{yuan2017temporal}: training on the 7,986 videos (54,000 clips) in training set and evaluate on 5,000 test frames to directly compare with the current SOTA methods.
+\textbf{Datasets.} The activity driven weakly supervised detection task takes video and corresponding action label as training input, and is evaluated on static images with bounding box annotations. Charades dataset is a good choice to both train and evaluate on. It includes 9,848 videos of 157 action classes, among which, 66 are interactive actions with objects. There are on average 6.8 action labels for one video, resulting in a total of 67,000 clips. The official Charades dataset doesn't provide object bounding box annotations. Instead, we use the spatial bounding box annotations released by \cite{yuan2017temporal}. 
 
-\textbf{Evaluation metrics.} We have conducted experiments to evaluate the object detection and image classification performances on the test set. For detection, we report per-class \textit{average precision} (AP) at \textit{intersection-over-union} (IoU) of 0.5 between detection and ground truth boxes, and also mean AP (mAP) as a combined metric. For classification, we report the mAP on frame-level image classification. For object detection evaluation, the evaluation toolbox released by \cite{girshick2015fast} is slightly modified to adapt to Charades dataset. For image classification, the original evaluation code in \cite{pascal-voc-2012} is directly used for testing.
+In the released annotations, 17 objects in the 66 interactive actions are labeled with bounding boxes in the test set videos. The 1,812 test videos are downsampled to 1 frame per second (fps) and then annotated on each frames. There are 3.4 bounding box annotations per frame on average. Although all downsampled frames in test set have been annotated, 5,000 frames from 200 test videos are actually used for evaluation. We follow the same practice as in \cite{yuan2017temporal}: training on the 7,986 videos (54,000 clips) in training set and evaluate on 5,000 test frames to directly compare with the current SOTA methods.
+
+\textbf{Evaluation metrics.} We have conducted experiments to evaluate the object detection and image classification performances on the test set. For detection, we report per-class \textit{average precision} (AP) at \textit{intersection-over-union} (IoU) of 0.5 between detection and ground truth boxes, and also mean AP (mAP) as a combined metric. We also report \textit{CorLoc} \cite{deselaers2012weakly}, a commonly-used weakly supervised detection metric. CorLoc represents the percentage of images on which at least one instance of the target object class is correctly detected (IoU\textgreater0.5) over all images that contain at least one instance of the target class. The evaluation code in TensorFlow detection metric toolkit is directly used. For classification, we report the mAP on frame-level image classification. For object detection evaluation, the evaluation toolbox released by \cite{girshick2015fast} is slightly modified to adapt to Charades dataset. For image classification, the original evaluation code in \cite{pascal-voc-2012} is directly used for testing.
 
 \subsection{Implementation details}
-The attention 
+We adopt a pre-trained convolutional neural network as our backbone feature extraction network ($\phi()$). For comparison between different network architectures, we experimented with both ResNet-101 and VGG-16 pretrained on ImageNet dataset. All \textit{conv} layers are followed with \textit{ReLU} activation except for the top layer. We replace the \textit{fc} layer following the \textit{conv5} block to classify person region and proposals. In practice, we use three sibling classification layers. One of them is used for person region action classification, classifying the person region feature to a 66-dimensional score. The other two are used for classifying proposals to action classes (66-dimensional scores) and object classes (17-dimensional scores) respectively. Batch normalization \cite{ioffe2015batch} is performed on all convolutional layers. 
+
+The attention module includes action-keypoint mapping and the location probability mapping. To select the dominant keypoint given an action class, we model the mapping with a 2D matrix with size $n_a\times n_{kp}$. Numbers in the matrix represent the importance of one keypoint for an action class. For given action class, the top keypoint is selected after applying softmax on the importance weights. During training, the selected keypoint location is involved in the attention weight calculation $f_{\mu, \sigma}(r_k)$, thus the action-keypoint mapping matrix can be back-propagated and updated. The attention for object location probability is modeled with a action and time step dependent 2D spatial normal distribution. The parameters include distribution mean $\mu \in \mathbbm{R}^{n_a\times\scr{K}\times2}$, and variance $\sigma \in \mathbbm{R}^{n_a\times\scr{K}\times2\times2}$.
+
+In our implementation, the Adam optimizer \cite{kingma2014adam} is implemented with $\beta_1=0.9$, $\beta_2=0.999$, learning rate of $2\times 10^{-5}$ and batch size of $4$. The balance between the two loss terms is adjusted thus they have similar value scales and the hyperparameters $w_a$, $w_o$ are validated on a held-out validation set. In practice, the loss weights are set as $w_a=1.0$, $w_o=2.0$. The mean and variance matrix $\mu$, $\sigma$ are initialized as $\mathbbm{0}$ and diagonal matrix $diag(10)$. The input frames are resized such that the shorter side is 600 pixels, following the same practice in 
+\cite{ren2015faster}. The number of sampled frames in a clip is set as $\scr{K}=8$ and the number of proposals per frame is set as $n_R=700$. The whole framework is implemented with PyTorch framework. On a single Nvidia Tesla M40 GPU, 11GB of memory is occupied with batch size of 4. It takes around 20 hrs to converge on a single card. The inference time for a VGA-size input image is around 0.10s.
+
 \subsection{Ablation study}
+To explore how much each module contributes to the final performance, we investigate with different variants of our framework: different backbone architecture, different attention modules and different loss term combinations. The backbone architectures include VGG-16 and ResNet-101. The different attention modules include distribution and grid based attention mechanism. We make a discrete version of attention module by predefining a $3\times 3$ grid around the keypoint, and the size of each cell of the grid is fixed to be $64\times 64$. There is an estimated weight for each cell as attention and all proposals whose centers fall into the cell will be assigned with the attention weight. A comparison of learned distribution and grid attention weight is shown in \figref{}. 
+
+We also experimented with different learning strategies for distribution attention: learning distribution mean only ($\mu$), learning variance only ($\sigma$) and joinly learning mean and variance ($\mu+\sigma$). The supervision of the proposed pipeline comes in two aspects: object classification and action classification. We experimented with applying either one supervision signal or applying both supervisions. As shown in the quantitative results in \tabref{tbl:ab_study}, the distribution based attention outperforms by a large margin, proving the effectiveness of learning the continuous attention weights. Another observation is from the comparison between learning $\mu$, $\sigma$ and $\mu+\sigma$ that learning all hyper-parameters in the distribution generates better performance, showing that our modeling of spatial correlation can be optimized by learning.  We encourage the object classification module to learn the object appearance and use the action classification module to help find the the most informative locations in the frame. The joint learning of both classification losses should give better performance, aligning with the numbers in \tabref{tbl:ab_study}.
+
+We compare with the supervised version of our approach, which leverages the bounding box annotations for supervision. The supervised method serves as a upper bound of the framework. For the supervised variant, only the object classification stream in \figref{fig:pipeline} works. The top 700 proposals are selected as input to the classification network. To guarantee at least 20 positive samples for each frame, the IoU threshold is set as 0.45: proposals having higher IoU than the threshold with ground truth boxes are used as positive samples for the object class and vice versa. The negative and positive sample ratio is set as 5. 42k annotated frames excluding the 5k test frames are used for training. The performance of the supervised version of our approach is shown in \tabref{tbl:sota}.
+
+\begin{table}[]
+\fontsize{8}{9}\selectfont
+% \def\arraystretch{1.5}
+\setlength{\tabcolsep}{3pt}
+\centering
+\caption{Object detection performances of different variants of our approach}
+\label{tbl:ab_study}
+\begin{tabular}{l|c|c|c}
+\specialrule{.2em}{.1em}{.1em}
+Backbone  & Attention method  & Loss module  & mAP (det)    \\ \hline
+VGG-16    & Grid              & action  & 1.36   \\
+VGG-16    & Grid              & object  & 2.67   \\
+VGG-16    & Grid              & action+object  & 3.41   \\
+VGG-16    & Distribution      & oction+object  & 4.87 \\
+ResNet-101 & Grid             & action+object  & 4.06 \\
+ResNet-101 & Distribution     & action  & 2.26 \\
+ResNet-101 & Distribution     & object  & 3.43 \\
+ResNet-101 & Distribution ($\mu$)     & action+object  & 5.46 \\ 
+ResNet-101 & Distribution ($\sigma$)     & action+object  & 5.46 \\
+ResNet-101 & Distribution ($\mu+\sigma$)     & action+object  & \textbf{5.87} \\\hline
+\end{tabular}
+\end{table}
+
+
 \subsection{Comparison with SOTA}
+Our method is compared with several baseline methods on the same dataset for both the detection (det) and classification (cls) tasks. The baselines include \cite{bilen2016weakly,kantorov2016contextlocnet} which are weakly supervised object detectors learning from static images, \cite{yuan2017temporal} which learns object detector from videos but only leverages the temporal consistency within the same action class, R*CNN \cite{gkioxari2015contextual} with both pretrained model and model trained on Charades data and Faster R-CNN (pretrained and trained on Charades), which is a fully supervised baseline. The performances are presented in Tab. \ref{tbl:sota}. We also compare current SOTA methods on each object class, which is shown in Tab. \ref{tbl:class_wise}.
+
+\begin{table}[]
+\fontsize{8}{9}\selectfont
+% \def\arraystretch{1.5}
+\setlength{\tabcolsep}{3pt}
+\centering
+\caption{Recall of top n proposals to attention center}
+\label{tbl:dist_recall}
+\begin{tabular}{l|c|c}
+\specialrule{.2em}{.1em}{.1em}
+recall@top n  & $\mu$  & $K$    \\ \hline
+recall@1    & 2.32              & 0.32   \\
+recall@5  & 16.54          & 10.37   \\
+recall@10    & 48.31              & 37.69   \\
+recall@100    & 100      & 100 \\ \hline
+\end{tabular}
+\end{table}
+
+
 \subsection{Generalization study}
 \begin{table*}[]
 \centering
-\fontsize{6}{8}\selectfont
+\fontsize{7.5}{8}\selectfont
 \caption{AP performance (\%) on each object class and mAP (\%) comparison with different weakly supervised methods.}
 \label{tbl:class_wise}
-\begin{tabular}{l|cccccccccccccccccc}
+\def\arraystretch{1.2}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{l|ccccccccccccccccc|c}
 \specialrule{.2em}{.1em}{.1em}
 Methods                                        & bed & broom & chair & cup & dish & door & laptop & mirror & pillow & refri & shelf & sofa    & table   & tv   & towel       & vacuum    & window     & mAP(\%)      \\ \hline
 WSDDN \cite{bilen2016weakly}                   & 2.38 & 0.04 &1.17 &0.03 & 0.13 & 0.31 & 2.81 & 0.28 & 0.02 & 0.12 & 0.03 & 0.41 & 1.74 & 1.18 & 0.07 & 0.08 & 0.22 & 0.65   \\
 ContextLocNet \cite{kantorov2016contextlocnet} & 7.40 & 0.03 & 0.55 & 0.02 & 0.01 & 0.17 & 1.11 &0.66 & 0 & 0.07 & 1.75 & 4.12 & 0.63 & 0.99 & 0.03 & 0.75 & 0.78 & 1.12  \\
-TD-LSTM \cite{yuan2017temporal}                & \textbf{9.19} & 0.04 & 4.18 & \textbf{0.49} & 0.11 & 1.17 & 2.91 & 0.30 & 0.08 & 0.29 & 3.21 & 5.86 & 3.35 & 1.27 & 0.09 & 0.60 & 0.47 & 1.98 \\ \hline
-Ours                                           & 8.64 & \textbf{3.79} & 7.31 & 0.28 & 1.23 & 5.64 & 5.49 & 1.44 & 2.34 & 8.94 & 4.14 & 8.61 & 6.25 & 1.97 & 0.17 & 3.24 & 0.33 & 4.10\\ \hline
+TD-LSTM \cite{yuan2017temporal}                & 9.19 & 0.04 & 4.18 & \textbf{0.49} & 0.11 & 1.17 & 2.91 & 0.30 & 0.08 & 0.29 & 3.21 & 5.86 & 3.35 & 1.27 & 0.09 & 0.60 & 0.47 & 1.98 \\ \hline
+Ours (vgg-16)                                  & 8.64 & 3.79 & 6.51 & 0.27 & 0.67 & 5.46 & 3.27 & 0.73 & 2.34 & 8.79 & 3.59 & 9.61 & 5.14 & 1.97 & 0.17 & 2.83 & 1.27 & 4.87\\ 
+Ours (ResNet-101)                              & \textbf{10.21} & \textbf{4.12} & \textbf{7.31} & 0.28 & \textbf{1.23} & \textbf{7.39} & \textbf{5.61} & \textbf{1.62} & \textbf{3.64} & \textbf{9.24} & \textbf{6.94} & \textbf{14.33} & \textbf{6.29} & \textbf{3.43} & \textbf{0.35} & \textbf{3.14} & \textbf{5.73} & \textbf{5.46}\\\hline
 \end{tabular}
 \end{table*}
-
-
-
-Our method is compared with several baseline methods on the same dataset for both the detection (det) and classification (cls) tasks. The baselines include \cite{bilen2016weakly,kantorov2016contextlocnet} which are weakly supervised object detectors learning from static images, \cite{yuan2017temporal} which learns object detector from videos but only leverages the temporal consistency within the same action class, R*CNN \cite{gkioxari2015contextual} with both pretrained model and model trained on Charades data and Faster R-CNN (pretrained and trained on Charades), which is a fully supervised baseline. The performances are presented in Tab. \ref{tbl:sota}. We also compare current SOTA methods on each object class, which is shown in Tab. \ref{tbl:class_wise}.
 
 \begin{table}[]
 \fontsize{7}{8}\selectfont
@@ -56,6 +113,7 @@ Faster R-CNN \cite{ren2015faster} (fine-tuned) &                                
 \end{table}
 \addtocounter{footnote}{1}
 \footnotetext{The test set is slightly different but numbers should be similar.}
+
 
 
 
