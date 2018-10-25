@@ -38,16 +38,24 @@ We compare with the supervised version of our approach, which leverages the boun
 \begin{tabular}{l|c|c|c}
 \specialrule{.2em}{.1em}{.1em}
 Backbone  & Attention method  & Loss module  & mAP (det)    \\ \hline
+VGG-16    & Distribution              & action  & 2.61   \\
+VGG-16    & Distribution              & object  & 4.86   \\
+VGG-16    & Distribution              & action+object  &  \textbf{6.97}   \\ \hline
+VGG-16 & Distribution ($\mu$)     & action+object  & 5.46 \\ 
+VGG-16 & Distribution ($\sigma$)     & action+object  & 3.27 \\
+VGG-16 & Distribution ($\mu + \sigma$)    & action+object  & 6.41 \\
+VGG-16 & Distribution ($\mu + \sigma, kp$ )    & action+object  & \textbf{6.87} \\\hline
+VGG-16    & Grid              & action+object  & 5.41   \\
+VGG-16    & Distribution      & action+object  & 6.87 \\
+ResNet-101 & Grid             & action+object  & 5.59 \\
+ResNet-101 & Distribution     & action+object  & \textbf{7.11} \\\hline
 VGG-16    & Grid              & action  & 1.36   \\
 VGG-16    & Grid              & object  & 2.67   \\
-VGG-16    & Grid              & action+object  & 3.41   \\
-VGG-16    & Distribution      & oction+object  & 4.87 \\
-ResNet-101 & Grid             & action+object  & 4.06 \\
 ResNet-101 & Distribution     & action  & 2.26 \\
 ResNet-101 & Distribution     & object  & 3.43 \\
 ResNet-101 & Distribution ($\mu$)     & action+object  & 5.46 \\ 
 ResNet-101 & Distribution ($\sigma$)     & action+object  & 5.46 \\
-ResNet-101 & Distribution ($\mu+\sigma$)     & action+object  & \textbf{5.87} \\\hline
+ResNet-101 & Distribution ($\mu + \sigma$)    & action+object  & \textbf{7.11} \\\hline
 \end{tabular}
 \end{table}
 
@@ -91,6 +99,29 @@ Ours (vgg-16)                                  & 8.64 & 3.79 & 6.51 & 0.27 & 0.6
 Ours (ResNet-101)                              & \textbf{10.21} & \textbf{4.12} & \textbf{7.31} & 0.28 & \textbf{1.23} & \textbf{7.39} & \textbf{5.61} & \textbf{1.62} & \textbf{3.64} & \textbf{9.24} & \textbf{6.94} & \textbf{14.33} & \textbf{6.29} & \textbf{3.43} & \textbf{0.35} & \textbf{3.14} & \textbf{5.73} & \textbf{5.46}\\\hline
 \end{tabular}
 \end{table*}
+
+
+\begin{table*}[]
+\centering
+\fontsize{7.5}{8}\selectfont
+\caption{AP performance (\%) on each object class and mAP (\%) comparison with different weakly supervised methods.}
+\label{tbl:class_wise}
+\def\arraystretch{1.2}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{l|ccccccccccccccccc|c}
+\specialrule{.2em}{.1em}{.1em}
+Methods                                        & bed & broom & chair & cup & dish & door & laptop & mirror & pillow & refri & shelf & sofa    & table   & tv   & towel       & vacuum    & window     & mAP(\%)      \\ \hline
+WSDDN \cite{bilen2016weakly}                   & 2.38 & 0.04 &1.17 &0.03 & 0.13 & 0.31 & 2.81 & 0.28 & 0.02 & 0.12 & 0.03 & 0.41 & 1.74 & 1.18 & 0.07 & 0.08 & 0.22 & 0.65   \\
+ContextLocNet \cite{kantorov2016contextlocnet} & 7.40 & 0.03 & 0.55 & 0.02 & 0.01 & 0.17 & 1.11 &0.66 & 0 & 0.07 & 1.75 & 4.12 & 0.63 & 0.99 & 0.03 & 0.75 & 0.78 & 1.12  \\
+TD-LSTM \cite{yuan2017temporal}                & 9.19 & 0.04 & 4.18 & 0.49 & 0.11 & 1.17 & 2.91 & 0.30 & 0.08 & 0.29 & 3.21 & 5.86 & 3.35 & 1.27 & 0.09 & 0.60 & 0.47 & 1.98 \\ \hline
+
+Ours (w/o kp)                                 & 6.41 & 2.59 & 4.34 & 2.84 & 1.65 & 2.76 & 2.34 & 1.33 & 1.29 & 4.01 & 2.62 & 7.74 & 5.03 & 1.25 & 2.36 & 0.97 & 2.01 & 3.34\\ 
+% Ours (obj cls)                                 & 11.76 & 3.65 & 8.62 & 0.61 & 1.84 & 6.24 & 4.21 & 2.86 & 4.41 & 9.86 & 5.98 & 11.43 & 7.35 & 3.46 & 1.87 & 4.13 & 3.27 & 5.47\\ 
+% Ours                              & \textbf{13.24} & \textbf{4.22} & \textbf{10.31} & \textbf{1.32} & \textbf{7.30} & \textbf{12.70} & \textbf{8.94} & \textbf{6.88} & \textbf{5.20} & \textbf{17.94} & \textbf{7.89} & \textbf{11.93} & \textbf{8.15} & \textbf{11.75} & \textbf{3.32} & \textbf{9.39} & \textbf{3.53} & \textbf{6.87}\\\hline
+Ours                              & \textbf{12.87} & \textbf{3.89} & \textbf{10.14} & \textbf{1.08} & \textbf{7.32} & \textbf{12.35} & \textbf{8.22} & \textbf{6.17} & \textbf{4.82} & \textbf{18.12} & \textbf{7.80} & \textbf{11.65} & \textbf{8.07} & \textbf{10.89} & \textbf{3.16} & \textbf{9.24} & \textbf{3.07} & \textbf{6.87}\\\hline
+\end{tabular}
+\end{table*}
+
 
 \begin{table}[]
 \fontsize{7}{8}\selectfont
