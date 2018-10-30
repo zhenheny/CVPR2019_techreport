@@ -110,6 +110,22 @@ Ours (ResNet-101)                              & \textbf{15.04} & \textbf{9.17} 
 \end{tabular}
 \end{table*}
 
+\begin{table*}[]
+\centering
+\fontsize{7.5}{8}\selectfont
+\caption{AP performance (\%) on selected object classes and mAP (\%) comparison with other weakly supervised methods on HICO-DET dataset.}
+\label{tbl:class_wise_hico}
+\def\arraystretch{1.2}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{l|ccccccccccccccccc|c}
+\specialrule{.2em}{.1em}{.1em}
+Methods & apple & bicycle & bottle & chair & cellphone & frisbee & kite & surfboard & train & umbrella & mAP(\%)      \\ \hline
+WSDDN \cite{bilen2016weakly}  & 0.46 & 4.19 &1.12 &3.87 & 1.02 & 1.24 & 1.15 & 0.86 & 6.76 & 2.35 & 3.47   \\
+R*CNN \cite{gkioxari2015contextual}   & 1.13 & 3.26 & 1.57 & 2.35 & 1.47 & 0.32 & 2.70 & 2.86 & 3.04 & 2.85 \\ \hline
+Ours (vgg-16)                                  & 1.36 & 4.31 & 2.29 & 5.74 & 7.36 & 1.93 & 0.56 & 5.71 & 5.36 & 6.41 & 4.82\\ 
+\end{tabular}
+\end{table*}
+
 
 \subsection{Comparison with SOTA}
 Our method is compared with current SOTA methods as well as several baseline methods we came up with. The SOTA methods include weakly supervised object detection methods: (1) WSDDN \cite{bilen2016weakly}; (2) ContextLocNet \cite{kantorov2016contextlocnet}, action-driven weakly supervised object detection method: (3) TD-LSTM \cite{yuan2017temporal} and baseline methods we constructed: (4) R*CNN \cite{gkioxari2015contextual} is designed for action recognition with awareness of the interacted objects. We used the interacted object bounding box as object detection result. The R*CNN model is pre-trained on Pascal-action dataset and then finetuned on Charades or HICO-DET dataset. (5) R*CNN with pose estimation as in our method. Original R*CNN takes only person detection as input, to be fair comparison, we replace the max pooling of object classification score in original R*CNN with weighted sum as in our implementation. 
